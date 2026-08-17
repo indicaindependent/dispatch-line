@@ -2,12 +2,20 @@
 """The Dispatch Line — deterministic format gate (public reference implementation).
 Pure Python, no dependencies. Fails closed: returns (False, [reasons]) on any violation.
 
+FORMAT NOTE (v2, corrected): the Dispatch Line is PROSE-FIRST. An earlier version
+required a leading colored square + an ALL-CAPS "named concept" opener. Re-analysis of
+real standalone-post ("root") engagement data plus current Bluesky ranking behavior showed
+that styling actively HURTS a standalone post's reach: prose openers roughly doubled the
+likes of emoji+CAPS openers. Bluesky's feed is conversation/engagement-velocity driven and
+discounts broadcast/engagement-bait styling. So this validator now BANS the leading square
+and the ALL-CAPS shout opener, and rewards a natural prose lede.
+
 Usage:
     from validator import validate
-    ok, errors = validate(text, concept="THE EXAMPLE CONCEPT")
+    ok, errors = validate(text, concept="the refinery war")
 
-Or from the CLI:
-    echo "🟥 THE EXAMPLE ..." | python3 validator.py --concept "THE EXAMPLE"
+CLI:
+    echo "Ukraine has stopped fighting for territory..." | python3 validator.py --concept "the refinery war"
 """
 import re, sys, argparse
 
@@ -19,7 +27,7 @@ BANNED = [
 OUTLETS = r"(Reuters|AP|AFP|Al Jazeera|Bloomberg|CNN|BBC|CNBC|Guardian|NYT|WSJ)"
 
 def validate(text, concept=None, min_chars=200, max_chars=300):
-    """Return (ok, errors[]). Enforces the Dispatch Line format rules."""
+    """Return (ok, errors[]). Enforces the PROSE-FIRST Dispatch Line rules."""
     e = []
     t = (text or "").strip()
     if not t:
@@ -31,16 +39,25 @@ def validate(text, concept=None, min_chars=200, max_chars=300):
     if n < min_chars:
         e.append(f"under {min_chars} chars ({n}) — use the whole budget")
 
-    # opens with a topic color-square
-    if not any(t.startswith(sq) for sq in SQUARES):
-        e.append("must open with a topic color-square")
+    # BAN the penalized broadcast opener: no leading colored square
+    if any(t.startswith(sq) for sq in SQUARES):
+        e.append("must NOT open with a colored square (prose-first; styling suppresses reach)")
 
-    # ALL-CAPS named concept in the headline line
     head = t.split("\n", 1)[0]
-    if not re.search(r"\b[A-Z][A-Z0-9 ]{4,40}\b", head):
-        e.append("no ALL-CAPS named concept in the headline line")
-    if concept and concept.upper() not in t.upper():
-        e.append(f"declared concept '{concept}' not found in text")
+    # BAN an ALL-CAPS shout at the very start of the headline (the old gimmick)
+    if re.match(r"^[\W]*[A-Z][A-Z0-9 ]{5,}\b", head):
+        e.append("headline opens with an ALL-CAPS shout — write a natural prose lede instead")
+    # must open with a real word (letter or quote), not an emoji/symbol
+    if not re.match(r"[A-Za-z\"']", t):
+        e.append("open with a word, not an emoji/symbol")
+
+    # coined concept should still appear, woven into the prose (any case) — keeps the lexicon idea
+    if concept:
+        c = concept.strip()
+        if c.lower().startswith("the "):
+            c = c[4:]
+        if c and c.lower() not in t.lower():
+            e.append(f"coined concept '{concept}' not present in the post")
 
     # never end on a question
     if t.rstrip().endswith("?"):
