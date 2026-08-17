@@ -1,0 +1,16 @@
+{
+  "post_date": "YYYY-MM-DD",
+  "fired_at_local": "HH:MM",
+  "concept_name": "THE EXAMPLE CONCEPT",
+  "square": "🟥",
+  "topic": "war|osint|surveillance|money|politics",
+  "text": "the full post as published",
+  "char_count": 286,
+  "receipt_source": "human-readable source label (for your own audit; not printed in the post)",
+  "post_uri": "at://.../app.bsky.feed.post/...",
+  "post_url": "https://bsky.app/profile/<handle>/post/<rkey>",
+  "status": "draft|scheduled|fired|held|failed",
+  "hold_reason": "if held: why",
+  "likes_24h": 0, "reposts_24h": 0, "replies_24h": 0, "quotes_24h": 0,
+  "snapshot_taken": false
+}

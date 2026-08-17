@@ -1,0 +1,8 @@
+.env
+.env.*
+__pycache__/
+*.pyc
+*.db
+*.json
+!schema.example.json
+.DS_Store
