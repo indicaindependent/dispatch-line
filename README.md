@@ -1,4 +1,4 @@
-# The Dispatch Line 📮
+# The Dispatch Line
 
 **An autonomous "one great post a day" system for Bluesky — a daily, self-contained, prose-first conversation-starter that coins a named concept, built on measured engagement data.**
 
